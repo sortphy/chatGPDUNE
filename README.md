@@ -10,3 +10,9 @@ deixaram eu escolher entao a gente vai usar deepseek #CHINANUMBER1
 
 dai roda isso
 ```ollama pull deepseek-r1```
+```ollama run deepseek-r1```
+
+e ai da pra perguntar e ele roda local
+```where to find my ass?```
+
+e ele responde  
