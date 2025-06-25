@@ -47,3 +47,4 @@ se quiser usar o frontend tem um readme dentro do /ChatGPDune explicando como fa
 - popular mais o banco
 - acho que e isso
 - find my ass
+- tematizar site para as cores do dune ou algo assim nao sei
