@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from langchain_ollama import OllamaLLM
 from fastapi.middleware.cors import CORSMiddleware
+import re
 
 app = FastAPI()
 
@@ -20,5 +21,11 @@ class Message(BaseModel):
 
 @app.post("/chat")
 async def chat(message: Message):
-    response = llm(message.text)
-    return {"reply": response}
+    prompt = f"Answer clearly and directly with no internal reasoning. {message.text}"
+    response = llm.invoke(prompt)
+    reply_text = str(response)
+
+    # Remove <think>...</think> blocks
+    reply_text = re.sub(r"<think>.*?</think>", "", reply_text, flags=re.DOTALL).strip()
+
+    return {"reply": reply_text}
