@@ -26,3 +26,16 @@ depois eu atomiatico isso e a gente salva o banco direto aqui n ogit
 
 
 se quiser usar o frontend tem um readme dentro do /ChatGPDune explicando como faz
+
+
+
+
+### todo list
+- precisa trocar o deepseek-r1 por outra versao mais leve do deepseek, mesmo na minha 4060 ta demorando um seculo pra gerar um "Yes"
+- talvez so esteja configurado errado mas essa porra tem 5gb entao vale mais a pena pegar um modelo menor
+- ate pq com a RAG boa parte das informacoes, se nao todas, vao vir do banco de dados e nao do proprio treinando dele
+- tem que melhorar a UI
+- tem que fazer a RAG
+- popular mais o banco
+- acho que e isso
+- find my ass
