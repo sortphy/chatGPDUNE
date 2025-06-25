@@ -19,3 +19,5 @@ e ele responde
 ![video](https://github.com/user-attachments/assets/fcdd00b6-2ae5-4d03-a2e1-3730a1a20d92)
 
 
+tambem vai ter que baixar o neo4j desktop, rtodar um banco de dados e ai rodar aquele arquivo push data do python que ta la pra pppular o banco
+depois eu atomiatico isso e a gente salva o banco direto aqui n ogit
