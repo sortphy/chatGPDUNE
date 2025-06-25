@@ -28,6 +28,14 @@ depois eu atomiatico isso e a gente salva o banco direto aqui n ogit
 se quiser usar o frontend tem um readme dentro do /ChatGPDune explicando como faz
 
 
+# como rodar:
+- criar venv
+- baixa tudo que ta no requirements
+- baixa o ollama pelo site deles tem link ali em cima
+- baixa o deepseek-r1 tem comando ali em cima
+- nao precisa rodar ele, o programa roda sozinho
+- segue as instrucoes pra rodar o frontend e pronto
+- se nao quiser rodar o frontend ai so da pra usar via hard code pelo arquivo test_ollama
 
 
 ### todo list
