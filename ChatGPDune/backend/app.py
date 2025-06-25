@@ -6,6 +6,15 @@ import re
 
 app = FastAPI()
 
+
+BASE_PROMPT = (
+    "You are an expert on the Dune universe by Frank Herbert. "
+    "Always answer questions strictly based on the Dune books and lore. "
+    "Ignore anything unrelated to Dune. "
+    "If a question is unclear, ask for clarification.\n\n"
+    "Question: {question}"
+)
+
 # Allow your frontend origin (adjust if needed)
 app.add_middleware(
     CORSMiddleware,
@@ -21,8 +30,11 @@ class Message(BaseModel):
 
 @app.post("/chat")
 async def chat(message: Message):
-    prompt = f"Answer clearly and directly with no internal reasoning. {message.text}"
-    response = llm.invoke(prompt)
+
+    full_prompt = BASE_PROMPT.format(question=message.text)
+
+    response = llm.invoke(full_prompt)
+
     reply_text = str(response)
 
     # Remove <think>...</think> blocks
