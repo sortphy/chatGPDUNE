@@ -15,4 +15,6 @@ dai roda isso
 e ai da pra perguntar e ele roda local
 ```where to find my ass?```
 
-e ele responde  
+e ele responde 
+https://github.com/user-attachments/assets/d01f38bc-ce0a-4db3-a080-d714210c251b
+
