@@ -46,7 +46,7 @@ async def chat(message: Message):
 
     reply_text = str(response)
 
-    # Remove <think>...</think> blocks
+    # APAGAR OS <think>...</think> PRA NAO MOSTRAR O PENSAMENTO DA LLM NO FRONT
     reply_text = re.sub(r"<think>.*?</think>", "", reply_text, flags=re.DOTALL).strip()
 
     return {"reply": reply_text}
