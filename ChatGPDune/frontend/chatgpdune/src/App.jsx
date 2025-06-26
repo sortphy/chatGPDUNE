@@ -164,7 +164,7 @@ export default function App() {
 
           {/* Footer */}
           <div className="text-center text-xs text-[#a67c52] mt-3">
-            Using Ollama & DeepSeek R1 • Às vezes demora, depende da máquina
+            Using Ollama & DeepSeek R1 • Às vezes demora, depende da máquina, pois roda local.
           </div>
         </div>
       </div>
