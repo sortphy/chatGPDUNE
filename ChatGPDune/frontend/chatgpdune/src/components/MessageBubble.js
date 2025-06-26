@@ -1,4 +1,4 @@
-import { Bot, User } from "lucide-react";
+import { User } from "lucide-react";
 import TypingAnimation from './TypingAnimation';
 
 export default function MessageBubble({ message }) {
@@ -15,7 +15,11 @@ export default function MessageBubble({ message }) {
         {isUser ? (
           <User className="w-4 h-4 text-white" />
         ) : (
-          <Bot className="w-4 h-4 text-white" />
+          <img 
+            src="/images/sortphy.png" 
+            alt="Sortphy Bot" 
+            className="w-full h-full rounded-full object-cover"
+          />
         )}
       </div>
 
