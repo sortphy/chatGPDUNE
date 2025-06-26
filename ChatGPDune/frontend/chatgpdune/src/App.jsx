@@ -72,9 +72,9 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-[#d97706] to-[#fbbf24] bg-clip-text text-transparent">
-                Dune DeepSeek
+                ChatGPDune
               </h1>
-              <p className="text-sm text-[#bfa77a]">Your guide to Arrakis</p>
+              <p className="text-sm text-[#bfa77a]">Powered by Sortphy</p>
             </div>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function App() {
 
           {/* Footer */}
           <div className="text-center text-xs text-[#a67c52] mt-3">
-            Powered by the Sortphy | Using Ollama & DeepSeek R1 • Às vezes demora, depende da máquina
+            Using Ollama & DeepSeek R1 • Às vezes demora, depende da máquina
           </div>
         </div>
       </div>
