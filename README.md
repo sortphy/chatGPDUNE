@@ -48,3 +48,89 @@ se quiser usar o frontend tem um readme dentro do /ChatGPDune explicando como fa
 - acho que e isso
 - find my ass
 - tematizar site para as cores do dune ou algo assim nao sei
+
+
+
+-----------------------
+
+Here’s a professional and clear `README.md` for your GitHub project:
+
+---
+
+# ChatGPDune
+
+**ChatGPDune** is a **Dune-themed chatbot** powered by **Ollama** using the `deepseek-r1` LLM for conversation and **Neo4j** for retrieval-augmented generation (RAG). This project combines a stylish front-end, a fast Python backend, and a local knowledge graph to deliver immersive responses in the spirit of the Dune universe.
+
+---
+
+## 🏗️ Tech Stack
+
+* **LLM**: [`deepseek-r1`](https://ollama.com/library/deepseek-r1) via [Ollama](https://ollama.com/)
+* **RAG**: [Neo4j](https://neo4j.com/)
+* **Backend**: FastAPI (Python)
+* **Frontend**: React
+* **Local setup**: Virtualenv, Node.js, Ollama
+
+---
+
+## 🚀 How to Run
+
+### 1. Clone the project
+
+```bash
+git clone https://github.com/yourusername/ChatGPDune.git
+cd ChatGPDune
+```
+
+### 2. Install Ollama
+
+Download and install from: [https://ollama.com/download](https://ollama.com/download)
+
+### 3. Pull the model
+
+After installing Ollama, run:
+
+```bash
+ollama pull deepseek-r1
+```
+
+### 4. Set up the Python backend
+
+```bash
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 5. Run the backend
+
+In one terminal:
+
+```bash
+cd backend
+uvicorn app:app --reload
+```
+
+### 6. Run the frontend
+
+In another terminal:
+
+```bash
+cd frontend/chatgpdune
+npm install  # only needed the first time
+npm run start
+```
+
+---
+
+## 🧠 Features
+
+* 🐪 Dune-themed conversation style
+* 🧠 Retrieval-Augmented Generation with Neo4j
+* 🧾 Local LLM processing with deepseek-r1
+* ⚡ FastAPI-powered backend
+* 🎨 Modern frontend with React
+
