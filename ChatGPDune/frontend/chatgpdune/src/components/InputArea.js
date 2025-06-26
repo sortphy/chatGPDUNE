@@ -11,7 +11,7 @@ export default function InputArea({
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#1a120b] via-[#1a120b]/95 to-transparent pt-6 pb-6">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="relative bg-[#2b1b11]/60 backdrop-blur-sm rounded-2xl border border-[#3f2e1e]/50 shadow-2xl transition-all duration-200 focus-within:border-[#d97706]/60 focus-within:shadow-[#d97706]/10">
+        <div className="relative bg-[#2b1b11]/60 backdrop-blur-sm rounded-2xl border border-[#3f2e1e]/50 shadow-2xl transition-all duration-200 focus-within:border-[#8b4513]/60 focus-within:shadow-[#8b4513]/10">
           <textarea
             ref={inputRef}
             value={input}
@@ -32,7 +32,7 @@ export default function InputArea({
           <button
             onClick={onSendMessage}
             disabled={!input.trim() || isLoading}
-            className="absolute right-3 bottom-3 w-10 h-10 bg-gradient-to-r from-[#d97706] to-[#fbbf24] rounded-xl flex items-center justify-center text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="absolute right-3 bottom-3 w-10 h-10 bg-gradient-to-r from-[#8b4513] to-[#cd853f] rounded-xl flex items-center justify-center text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             <Send className="w-4 h-4" />
           </button>
