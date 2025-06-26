@@ -9,7 +9,7 @@ export default function MessageBubble({ message }) {
       {/* Avatar */}
       <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
         isUser 
-          ? "bg-gradient-to-r from-[#4f46e5] to-[#7c3aed]" 
+          ? "bg-gradient-to-r from-[#8b4513] to-[#cd853f]" 
           : "bg-gradient-to-r from-[#d97706] to-[#fbbf24]"
       }`}>
         {isUser ? (
@@ -23,7 +23,7 @@ export default function MessageBubble({ message }) {
       <div className={`group max-w-3xl ${isUser ? "ml-12" : "mr-12"}`}>
         <div className={`rounded-2xl px-4 py-3 shadow-lg transition-all duration-200 hover:shadow-xl ${
           isUser
-            ? "bg-gradient-to-r from-[#4f46e5] to-[#7c3aed] text-white ml-auto"
+            ? "bg-gradient-to-r from-[#a0522d] to-[#cd853f] text-white ml-auto border border-[#8b4513]/30"
             : "bg-[#2d2214]/50 border border-[#3f2e1e]/50 backdrop-blur-sm"
         }`}>
           {message.isTyping ? (
