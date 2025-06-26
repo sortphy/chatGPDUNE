@@ -37,6 +37,13 @@ export default function MessageBubble({ message, onFeedback }) {
     };
   };
 
+  // 24h timestamp
+  const timestamp = new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
   return (
     <div
       className={`flex gap-4 animate-in slide-in-from-bottom-2 duration-300 ${
@@ -105,7 +112,7 @@ export default function MessageBubble({ message, onFeedback }) {
             isUser ? "text-right" : "text-left"
           }`}
         >
-          {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          {timestamp}
         </div>
       </div>
     </div>
