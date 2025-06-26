@@ -22,7 +22,7 @@ BASE_PROMPT = (
     "Question: {question}"
 )
 
-# Allow your frontend origin (adjust if needed)
+# CORS PRA LIBERAR O FRONT PRA ENTRAR NO BACK
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
