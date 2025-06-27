@@ -18,7 +18,7 @@ def ensure_ollama(model=EMBED_MODEL, timeout=30):
     # 1) Is the server already up?
     try:
         requests.get(f"{OLLAMA_URL}/api/tags", timeout=2)
-        return                  # It’s running – nothing to do.
+        return                  # It's running – nothing to do.
     except requests.exceptions.RequestException:
         pass
 
@@ -48,7 +48,34 @@ def load_and_chunk_documents(data_dir="./data"):
     docs = []
     for fn in os.listdir(data_dir):
         if fn.endswith(".txt"):
-            docs.extend(TextLoader(os.path.join(data_dir, fn)).load())
+            file_path = os.path.join(data_dir, fn)
+            try:
+                # Try UTF-8 first (most common)
+                loader = TextLoader(file_path, encoding='utf-8')
+                docs.extend(loader.load())
+                print(f"Loaded {fn} with UTF-8 encoding")
+            except UnicodeDecodeError:
+                try:
+                    # Try UTF-8 with error handling
+                    loader = TextLoader(file_path, encoding='utf-8', autodetect_encoding=True)
+                    docs.extend(loader.load())
+                    print(f"Loaded {fn} with UTF-8 encoding (with error handling)")
+                except Exception as e:
+                    try:
+                        # Try latin-1 as fallback (can decode any byte sequence)
+                        loader = TextLoader(file_path, encoding='latin-1')
+                        docs.extend(loader.load())
+                        print(f"Loaded {fn} with latin-1 encoding")
+                    except Exception as e2:
+                        print(f"Failed to load {fn}: {e2}")
+                        continue
+            except Exception as e:
+                print(f"Failed to load {fn}: {e}")
+                continue
+    
+    if not docs:
+        raise RuntimeError("No documents were successfully loaded!")
+    
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=512, chunk_overlap=20)
     return splitter.split_documents(docs)
@@ -65,7 +92,7 @@ def populate_neo4j_with_chunks(chunks):
 
 if __name__ == "__main__":
     os.makedirs("./data", exist_ok=True)
-    with open("./data/dune_excerpt.txt", "w") as f:
+    with open("./data/dune_excerpt.txt", "w", encoding='utf-8') as f:
         f.write("The spice must flow…")
     chunks = load_and_chunk_documents()
     populate_neo4j_with_chunks(chunks)
