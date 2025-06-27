@@ -14,7 +14,7 @@ load_dotenv()
 
 # Configuration
 NEO4J_URI      = os.getenv("NEO4J_URI")
-NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
+NEO4J_USER = os.getenv("NEO4J_USER")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
 OLLAMA_URL     = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 EMBED_MODEL    = "nomic-embed-text"
@@ -64,7 +64,7 @@ def ensure_ollama(model=EMBED_MODEL, timeout=PROCESSING_TIMEOUT):
 def clear_neo4j_database():
     """Clear existing chunks from Neo4j database"""
     print("Clearing existing data from Neo4j...")
-    driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
+    driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
     try:
         with driver.session() as session:
             result = session.run(f"MATCH (n:{NODE_LABEL}) RETURN count(n) as count")
@@ -133,6 +133,12 @@ def populate_neo4j_with_chunks(chunks):
     print(f"Generating embeddings and storing {len(chunks)} chunks in Neo4j...")
     print(f"Using model: {EMBED_MODEL}, batch_size: {BATCH_SIZE}")
     
+    # Set environment variables to ensure Neo4j credentials are available
+    # This is the primary fix for the username issue
+    os.environ['NEO4J_USER'] = NEO4J_USER
+    os.environ['NEO4J_PASSWORD'] = NEO4J_PASSWORD
+    os.environ['NEO4J_URI'] = NEO4J_URI
+    
     # Process in batches with progress bar
     total_batches = (len(chunks) + BATCH_SIZE - 1) // BATCH_SIZE
     successful_batches = 0
@@ -142,19 +148,72 @@ def populate_neo4j_with_chunks(chunks):
                   total=total_batches):
         batch = chunks[i:i+BATCH_SIZE]
         try:
-            Neo4jVector.from_documents(
-                batch, embeddings,
-                url=NEO4J_URI, username=NEO4J_USERNAME, password=NEO4J_PASSWORD,
-                index_name=INDEX_NAME, node_label=NODE_LABEL,
-                embedding_node_property="embedding", text_node_property="text"
-            )
-            successful_batches += 1
+            # Method 1: Try with explicit parameters (most compatible)
+            try:
+                Neo4jVector.from_documents(
+                    batch, embeddings,
+                    url=NEO4J_URI, 
+                    username=NEO4J_USER, 
+                    password=NEO4J_PASSWORD,
+                    index_name=INDEX_NAME, 
+                    node_label=NODE_LABEL,
+                    embedding_node_property="embedding", 
+                    text_node_property="text"
+                )
+                successful_batches += 1
+            except TypeError:
+                # Method 2: Try without explicit username/password if the above fails
+                # Some versions expect these to be in environment variables only
+                Neo4jVector.from_documents(
+                    batch, embeddings,
+                    url=NEO4J_URI,
+                    index_name=INDEX_NAME, 
+                    node_label=NODE_LABEL,
+                    embedding_node_property="embedding", 
+                    text_node_property="text"
+                )
+                successful_batches += 1
+                
         except Exception as e:
             tqdm.write(f"✗ Error processing batch {i//BATCH_SIZE + 1}: {e}")
-            continue
+            # Try alternative approach for this batch
+            try:
+                # Method 3: Initialize Neo4jVector separately then add documents
+                vector_store = Neo4jVector(
+                    embeddings,
+                    url=NEO4J_URI,
+                    username=NEO4J_USER,
+                    password=NEO4J_PASSWORD,
+                    index_name=INDEX_NAME,
+                    node_label=NODE_LABEL,
+                    embedding_node_property="embedding",
+                    text_node_property="text"
+                )
+                vector_store.add_documents(batch)
+                successful_batches += 1
+                tqdm.write(f"✓ Batch {i//BATCH_SIZE + 1} processed with alternative method")
+            except Exception as e2:
+                tqdm.write(f"✗ Alternative method also failed for batch {i//BATCH_SIZE + 1}: {e2}")
+                continue
     
     print(f"✓ Neo4j populated! Successfully processed {successful_batches}/{total_batches} batches")
     print(f"✓ Index: {INDEX_NAME}, Node Label: {NODE_LABEL}")
+
+def verify_environment_variables():
+    """Verify all required environment variables are set"""
+    required_vars = ['NEO4J_URI', 'NEO4J_USER', 'NEO4J_PASSWORD']
+    missing_vars = []
+    
+    for var in required_vars:
+        if not os.getenv(var):
+            missing_vars.append(var)
+    
+    if missing_vars:
+        print(f"❌ Missing required environment variables: {', '.join(missing_vars)}")
+        print("Please check your .env file or set these variables.")
+        raise RuntimeError(f"Missing environment variables: {missing_vars}")
+    
+    print("✓ All required environment variables are set")
 
 def main():
     print("=" * 60)
@@ -165,6 +224,9 @@ def main():
     print(f"Ollama URL: {OLLAMA_URL}")
     print(f"Embedding model: {EMBED_MODEL}")
     print("=" * 60)
+    
+    # Verify environment variables first
+    verify_environment_variables()
     
     # Create data directory if it doesn't exist
     os.makedirs(DATA_DIR, exist_ok=True)
