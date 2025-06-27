@@ -14,13 +14,13 @@ OLLAMA_URL     = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 EMBED_MODEL    = "nomic-embed-text"
 
 # Tweakable settings
-CHUNK_SIZE = 512
-CHUNK_OVERLAP = 20
-BATCH_SIZE = 50
-PROCESSING_TIMEOUT = 30
-DATA_DIR = "./data"
-INDEX_NAME = "dune_chunks"
-NODE_LABEL = "DuneChunk"
+CHUNK_SIZE = 512          # Size of each text chunk
+CHUNK_OVERLAP = 20        # Overlap between chunks
+BATCH_SIZE = 50           # How many chunks to process at once
+PROCESSING_TIMEOUT = 30   # Ollama startup timeout
+DATA_DIR = "./data"       # Where your txt files are
+INDEX_NAME = "dune_chunks" # Neo4j index name
+NODE_LABEL = "DuneChunk"  # Neo4j node label
 
 def ensure_ollama(model=EMBED_MODEL, timeout=PROCESSING_TIMEOUT):
     if not shutil.which("ollama"):
