@@ -30,7 +30,7 @@ def create_vector_index(tx):
             try:
                 tx.run("""
                 CREATE VECTOR INDEX dune_chunks IF NOT EXISTS
-                FOR (n:Chunk) ON (n.embedding)
+                FOR (n:DuneChunk) ON (n.embedding)
                 OPTIONS {
                     indexConfig: {
                         `vector.dimensions`: 768,
@@ -47,7 +47,7 @@ def create_vector_index(tx):
         # Create text index with the exact name the retriever expects
         tx.run("""
         CREATE INDEX dune_chunks IF NOT EXISTS
-        FOR (n:Chunk) ON (n.text)
+        FOR (n:DuneChunk) ON (n.text)
         """)
         print("Text index 'dune_chunks' created successfully.")
         return "text"
@@ -62,10 +62,10 @@ def push_strings(tx, texts):
             vector = embedding_model.embed_query(text)
             print(f"Processing text {i+1}/{len(texts)}: {text[:50]}...")
             
-            # Use label "Chunk" and properties that match Neo4jVector expectations
+            # Use label "DuneChunk" to match your other pusher
             tx.run(
                 """
-                MERGE (n:Chunk {text: $text})
+                MERGE (n:DuneChunk {text: $text})
                 SET n.embedding = $embedding, n.id = $id
                 """,
                 text=text,
@@ -77,24 +77,33 @@ def push_strings(tx, texts):
 
 def verify_data(tx):
     """Verify that data was inserted correctly"""
-    result = tx.run("MATCH (n:Chunk) RETURN count(n) as count")
+    result = tx.run("MATCH (n:DuneChunk) RETURN count(n) as count")
     count = result.single()["count"]
     print(f"Total nodes inserted: {count}")
     
     # Show a sample
-    result = tx.run("MATCH (n:Chunk) RETURN n.text as text LIMIT 3")
+    result = tx.run("MATCH (n:DuneChunk) RETURN n.text as text LIMIT 3")
     print("Sample data:")
     for record in result:
         print(f"  - {record['text']}")
 
 def cleanup_old_data(tx):
-    """Remove old dune_chunks nodes if they exist"""
-    result = tx.run("MATCH (n:dune_chunks) RETURN count(n) as count")
+    """Remove old chunk nodes if they exist"""
+    # Clean up old Chunk nodes
+    result = tx.run("MATCH (n:Chunk) RETURN count(n) as count")
     old_count = result.single()["count"]
     if old_count > 0:
-        print(f"Found {old_count} old dune_chunks nodes, removing them...")
+        print(f"Found {old_count} old Chunk nodes, removing them...")
+        tx.run("MATCH (n:Chunk) DETACH DELETE n")
+        print("Old Chunk nodes removed.")
+    
+    # Clean up old dune_chunks nodes  
+    result = tx.run("MATCH (n:dune_chunks) RETURN count(n) as count")
+    old_count2 = result.single()["count"]
+    if old_count2 > 0:
+        print(f"Found {old_count2} old dune_chunks nodes, removing them...")
         tx.run("MATCH (n:dune_chunks) DETACH DELETE n")
-        print("Old nodes removed.")
+        print("Old dune_chunks nodes removed.")
 
 # Main execution
 try:
