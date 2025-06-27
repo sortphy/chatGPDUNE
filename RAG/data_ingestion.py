@@ -5,11 +5,17 @@ from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from neo4j import GraphDatabase
 from tqdm import tqdm
+from dotenv import load_dotenv
+
+
+# Load .env file variables
+load_dotenv()
+
 
 # Configuration
-NEO4J_URI      = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-NEO4J_USERNAME = os.getenv("NEO4J_USERNAME", "neo4j")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
+NEO4J_URI      = os.getenv("NEO4J_URI")
+NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
 OLLAMA_URL     = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 EMBED_MODEL    = "nomic-embed-text"
 
