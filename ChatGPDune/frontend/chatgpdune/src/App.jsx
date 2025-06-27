@@ -6,7 +6,7 @@ import './index.css';
 
 export default function App() {
   const [messages, setMessages] = useState([
-    { from: "bot", text: "Welcome to the desert planet! Ask me anything about the Dune universe - from spice mining to sandworms, politics to prophecies." },
+    { from: "bot", text: "Welcome to the desert planet! Ask me anything about the Dune universe - from spice mining to sandworms, politics to prophecies.", ragUsed: false },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -42,12 +42,21 @@ export default function App() {
       
       setMessages((prev) => {
         const withoutTyping = prev.filter(m => !m.isTyping);
-        return [...withoutTyping, { from: "bot", text: data.reply }];
+        return [...withoutTyping, { 
+          from: "bot", 
+          text: data.reply,
+          ragUsed: data.rag_used || false,
+          sources: data.sources || null
+        }];
       });
     } catch (err) {
       setMessages((prev) => {
         const withoutTyping = prev.filter(m => !m.isTyping);
-        return [...withoutTyping, { from: "bot", text: "The spice must flow... but connection failed. Please try again." }];
+        return [...withoutTyping, { 
+          from: "bot", 
+          text: "The spice must flow... but connection failed. Please try again.",
+          ragUsed: false
+        }];
       });
     } finally {
       setIsLoading(false);

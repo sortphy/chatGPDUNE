@@ -1,8 +1,8 @@
 import sys
 import os
-
+# Add the root directory to the Python path to access RAG module
+# Go up two levels: backend -> ChatGPDune -> root
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -70,7 +70,7 @@ class Message(BaseModel):
 async def chat(message: Message):
     # Check for the special "glauco" condition first
     if "glauco" in message.text.lower():
-        return {"reply": "Glauco."}
+        return {"reply": "Glauco.", "rag_used": False}
     
     try:
         if rag_enabled:
@@ -139,6 +139,9 @@ async def chat_with_rag_only(message: Message):
     if not rag_enabled:
         return {"error": "RAG system not available"}
     
+    # Check for the special "glauco" condition first
+    if "glauco" in message.text.lower():
+        return {"reply": "Glauco.", "rag_used": False}
     
     try:
         response = qa_chain.invoke({"query": message.text})

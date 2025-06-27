@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { User, ThumbsUp, ThumbsDown } from "lucide-react";
+import { User, ThumbsUp, ThumbsDown, Database } from "lucide-react";
 import TypingAnimation from "./TypingAnimation";
 
 /**
  * MessageBubble – chat message with inline feedback buttons (bot-only)
  * using solid/fill icons + CSS filter for a subtle Dune‑themed glow.
+ * Now includes RAG indicator for bot messages.
  */
 export default function MessageBubble({ message, onFeedback }) {
   const isUser = message.from === "user";
@@ -85,6 +86,22 @@ export default function MessageBubble({ message, onFeedback }) {
             <div className="whitespace-pre-wrap leading-relaxed">{message.text}</div>
           )}
         </div>
+
+        {/* RAG Indicator - only for bot messages */}
+        {!isUser && message.ragUsed && (
+          <div className="flex items-center gap-1 mt-1 mb-1">
+            <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#cd853f]/20 border border-[#cd853f]/30 text-[#cd853f] text-xs font-medium">
+              <Database className="w-3 h-3" />
+              <span>RAG</span>
+            </div>
+            {/* Optional: Show source count if available */}
+            {message.sources && message.sources.length > 0 && (
+              <span className="text-xs text-[#a67c52] ml-1">
+                ({message.sources.length} source{message.sources.length !== 1 ? 's' : ''})
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Feedback (bot only) */}
         {!isUser && (
