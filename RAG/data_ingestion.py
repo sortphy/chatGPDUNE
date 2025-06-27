@@ -1,5 +1,3 @@
-# backend/data_ingestion.py (continued)
-
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Neo4jVector
 from neo4j import GraphDatabase
