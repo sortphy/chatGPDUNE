@@ -1,7 +1,7 @@
 import os, subprocess, time, shutil, requests, atexit
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Neo4jVector
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader, PyPDFLoader, UnstructuredHTMLLoader, UnstructuredMarkdownLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from neo4j import GraphDatabase
 from tqdm import tqdm
@@ -22,11 +22,14 @@ EMBED_MODEL    = "nomic-embed-text"
 # Tweakable settings
 CHUNK_SIZE = 512          # Size of each text chunk
 CHUNK_OVERLAP = 20        # Overlap between chunks
-BATCH_SIZE = 200           # How many chunks to process at once (default = 50)
+BATCH_SIZE = 200          # How many chunks to process at once
 PROCESSING_TIMEOUT = 30   # Ollama startup timeout
-DATA_DIR = "./data"       # Where your txt files are
+DATA_DIR = "./data"       # Where your files are
 INDEX_NAME = "dune_chunks" # Neo4j index name
 NODE_LABEL = "DuneChunk"  # Neo4j node label
+
+# Supported file extensions
+SUPPORTED_EXTENSIONS = ['.txt', '.pdf', '.html', '.htm', '.md', '.markdown']
 
 def ensure_ollama(model=EMBED_MODEL, timeout=PROCESSING_TIMEOUT):
     if not shutil.which("ollama"):
@@ -79,37 +82,65 @@ def clear_neo4j_database():
     finally:
         driver.close()
 
-def load_and_chunk_documents(data_dir=DATA_DIR):
-    docs = []
-    files = [fn for fn in os.listdir(data_dir) if fn.endswith(".txt")]
+def get_appropriate_loader(file_path):
+    """Return the appropriate LangChain loader for the file type"""
+    _, ext = os.path.splitext(file_path.lower())
     
-    if not files:
-        print(f"⚠ No .txt files found in {data_dir}")
+    if ext == '.pdf':
+        return PyPDFLoader(file_path)
+    elif ext in ['.html', '.htm']:
+        return UnstructuredHTMLLoader(file_path)
+    elif ext in ['.md', '.markdown']:
+        return UnstructuredMarkdownLoader(file_path)
+    elif ext == '.txt':
+        # Try different encodings for text files
+        for encoding in ['utf-8', 'latin-1', 'cp1252']:
+            try:
+                return TextLoader(file_path, encoding=encoding)
+            except UnicodeDecodeError:
+                continue
+        # If all encodings fail, try with autodetect
+        return TextLoader(file_path, autodetect_encoding=True)
+    else:
+        raise ValueError(f"Unsupported file extension: {ext}")
+
+def load_and_chunk_documents(data_dir=DATA_DIR):
+    """Load and chunk documents from various file formats"""
+    docs = []
+    
+    # Get all supported files
+    all_files = os.listdir(data_dir)
+    supported_files = []
+    for fn in all_files:
+        _, ext = os.path.splitext(fn.lower())
+        if ext in SUPPORTED_EXTENSIONS:
+            supported_files.append(fn)
+    
+    if not supported_files:
+        print(f"⚠ No supported files found in {data_dir}")
+        print(f"Supported extensions: {', '.join(SUPPORTED_EXTENSIONS)}")
         return []
     
     print(f"Loading and chunking documents from {data_dir}...")
-    for fn in tqdm(files, desc="Loading files"):
+    print(f"Found {len(supported_files)} supported files: {', '.join(SUPPORTED_EXTENSIONS)}")
+    
+    for fn in tqdm(supported_files, desc="Loading files"):
         file_path = os.path.join(data_dir, fn)
+        _, ext = os.path.splitext(fn.lower())
+        
         try:
-            # Try UTF-8 first (most common)
-            loader = TextLoader(file_path, encoding='utf-8')
-            docs.extend(loader.load())
-            tqdm.write(f"✓ Loaded {fn} with UTF-8 encoding")
-        except UnicodeDecodeError:
-            try:
-                # Try UTF-8 with error handling
-                loader = TextLoader(file_path, encoding='utf-8', autodetect_encoding=True)
-                docs.extend(loader.load())
-                tqdm.write(f"✓ Loaded {fn} with UTF-8 encoding (with error handling)")
-            except Exception as e:
-                try:
-                    # Try latin-1 as fallback (can decode any byte sequence)
-                    loader = TextLoader(file_path, encoding='latin-1')
-                    docs.extend(loader.load())
-                    tqdm.write(f"✓ Loaded {fn} with latin-1 encoding")
-                except Exception as e2:
-                    tqdm.write(f"✗ Failed to load {fn}: {e2}")
-                    continue
+            loader = get_appropriate_loader(file_path)
+            file_docs = loader.load()
+            
+            # Add metadata about the source file and type
+            for doc in file_docs:
+                doc.metadata['source_file'] = fn
+                doc.metadata['file_type'] = ext
+                doc.metadata['file_path'] = file_path
+            
+            docs.extend(file_docs)
+            tqdm.write(f"✓ Loaded {fn} ({ext.upper()}) - {len(file_docs)} document(s)")
+            
         except Exception as e:
             tqdm.write(f"✗ Failed to load {fn}: {e}")
             continue
@@ -132,6 +163,9 @@ def populate_neo4j_with_chunks(chunks):
     
     print(f"Generating embeddings and storing {len(chunks)} chunks in Neo4j...")
     print(f"Using model: {EMBED_MODEL}, batch_size: {BATCH_SIZE}")
+    
+    # Start timing the embedding/storage process
+    start_time = time.time()
     
     # Set environment variables to ensure Neo4j credentials are available
     # This is the primary fix for the username issue
@@ -196,8 +230,15 @@ def populate_neo4j_with_chunks(chunks):
                 tqdm.write(f"✗ Alternative method also failed for batch {i//BATCH_SIZE + 1}: {e2}")
                 continue
     
+    # Calculate and display timing
+    elapsed_time = time.time() - start_time
+    hours = elapsed_time / 3600
+    minutes = (elapsed_time % 3600) / 60
+    
     print(f"✓ Neo4j populated! Successfully processed {successful_batches}/{total_batches} batches")
     print(f"✓ Index: {INDEX_NAME}, Node Label: {NODE_LABEL}")
+    print(f"✓ Embedding generation and storage took: {hours:.1f} hours ({minutes:.1f} minutes)")
+    print(f"✓ Average time per chunk: {elapsed_time/len(chunks):.2f} seconds")
 
 def verify_environment_variables():
     """Verify all required environment variables are set"""
@@ -215,34 +256,76 @@ def verify_environment_variables():
     
     print("✓ All required environment variables are set")
 
+def check_dependencies():
+    """Check if required packages for different file types are installed"""
+    missing_packages = []
+    
+    # Check for PDF support
+    try:
+        import pypdf
+    except ImportError:
+        missing_packages.append("pypdf (for PDF files)")
+    
+    # Check for HTML/Markdown support
+    try:
+        import unstructured
+    except ImportError:
+        missing_packages.append("unstructured (for HTML and Markdown files)")
+    
+    if missing_packages:
+        print(f"⚠ Missing optional packages: {', '.join(missing_packages)}")
+        print("Install with: pip install pypdf unstructured")
+        print("You can still process TXT files without these packages.")
+    else:
+        print("✓ All optional packages for file format support are installed")
+
 def main():
     print("=" * 60)
-    print("DUNE RAG DATA INGESTION")
+    print("MULTI-FORMAT RAG DATA INGESTION")
     print("=" * 60)
     print(f"Data directory: {DATA_DIR}")
     print(f"Neo4j URI: {NEO4J_URI}")
     print(f"Ollama URL: {OLLAMA_URL}")
     print(f"Embedding model: {EMBED_MODEL}")
+    print(f"Supported formats: {', '.join(SUPPORTED_EXTENSIONS)}")
     print("=" * 60)
+    
+    # Start timing the entire process
+    total_start_time = time.time()
     
     # Verify environment variables first
     verify_environment_variables()
     
+    # Check dependencies
+    check_dependencies()
+    
     # Create data directory if it doesn't exist
     os.makedirs(DATA_DIR, exist_ok=True)
     
-    # Create sample file if data directory is empty
-    if not any(fn.endswith('.txt') for fn in os.listdir(DATA_DIR)):
+    # Create sample files if data directory is empty
+    if not any(os.path.splitext(fn)[1].lower() in SUPPORTED_EXTENSIONS for fn in os.listdir(DATA_DIR)):
+        # Create sample TXT file
         with open(os.path.join(DATA_DIR, "dune_excerpt.txt"), "w", encoding='utf-8') as f:
             f.write("The spice must flow… Fear is the mind-killer. He who controls the spice controls the universe.")
-        print(f"✓ Created sample file in {DATA_DIR}")
+        
+        # Create sample Markdown file
+        with open(os.path.join(DATA_DIR, "sample.md"), "w", encoding='utf-8') as f:
+            f.write("# Sample Markdown\n\nThis is a **sample** markdown file for testing.\n\n## Features\n\n- Supports multiple formats\n- Automatic file type detection\n- Metadata preservation")
+        
+        print(f"✓ Created sample files in {DATA_DIR}")
     
     try:
         # Step 1: Clear existing data
+        clear_start = time.time()
         clear_neo4j_database()
+        clear_time = time.time() - clear_start
+        print(f"✓ Database clearing took: {clear_time:.1f} seconds")
         
         # Step 2: Load and chunk documents
+        chunk_start = time.time()
         chunks = load_and_chunk_documents()
+        chunk_time = time.time() - chunk_start
+        print(f"✓ Document loading and chunking took: {chunk_time:.1f} seconds")
         
         if not chunks:
             print("⚠ No chunks to process. Exiting.")
@@ -251,8 +334,26 @@ def main():
         # Step 3: Generate embeddings and populate Neo4j
         populate_neo4j_with_chunks(chunks)
         
+        # Calculate total time
+        total_elapsed = time.time() - total_start_time
+        total_hours = total_elapsed / 3600
+        total_minutes = (total_elapsed % 3600) / 60
+        
         print("\n" + "=" * 60)
         print("✅ INGESTION COMPLETE!")
+        print(f"✅ Total processing time: {total_hours:.1f} hours ({total_minutes:.1f} minutes)")
+        print(f"✅ Processed {len(chunks)} chunks total")
+        
+        # Show file type breakdown
+        file_types = {}
+        for chunk in chunks:
+            file_type = chunk.metadata.get('file_type', 'unknown')
+            file_types[file_type] = file_types.get(file_type, 0) + 1
+        
+        print("✅ File type breakdown:")
+        for file_type, count in file_types.items():
+            print(f"   {file_type.upper()}: {count} chunks")
+        
         print("=" * 60)
         
     except Exception as e:
