@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from base_dune_data import dune_data
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_ollama import OllamaEmbeddings  # trocado para langchain_ollama
 
 # Load env
 load_dotenv()
@@ -26,6 +26,6 @@ def push_strings(tx, texts):
         )
 
 with driver.session() as session:
-    session.write_transaction(push_strings, dune_data)
+    session.execute_write(push_strings, dune_data)  # updated from write_transaction
 
 print("✅ Strings com embedding salvas no Neo4j como :ManualEntry.")
