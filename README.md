@@ -39,16 +39,10 @@ se quiser usar o frontend tem um readme dentro do /ChatGPDune explicando como fa
 
 
 ### todo list
-- precisa trocar o deepseek-r1 por outra versao mais leve do deepseek, mesmo na minha 4060 ta demorando um seculo pra gerar um "Yes"
-- talvez so esteja configurado errado mas essa porra tem 5gb entao vale mais a pena pegar um modelo menor
-- ate pq com a RAG boa parte das informacoes, se nao todas, vao vir do banco de dados e nao do proprio treinando dele
-- tem que melhorar a UI
-- tem que fazer a RAG
-- popular mais o banco
-- acho que e isso
-- find my ass
-- tematizar site para as cores do dune ou algo assim nao sei
-
+- aumentar o banco de dados
+- implementar Similarity Scores na rag e retriever para saber quando foi usada
+- implementar um sistema de feedback de usuario
+- salvar todas as mensagens que o usuario manda hehehe
 
 
 -----------------------
