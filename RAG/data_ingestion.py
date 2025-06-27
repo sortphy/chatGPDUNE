@@ -27,6 +27,15 @@ def populate_neo4j_with_chunks(chunks):
     print("Neo4j populated with document chunks.")
 
 if __name__ == "__main__":
+    # Create a dummy data directory and file for demonstration
+    os.makedirs("./data", exist_ok=True)
+    with open("./data/dune_excerpt.txt", "w") as f:
+        f.write("The spice must flow. It is essential for space travel and extending life. Arrakis is the source of the spice, also known as Melange. The Fremen are the native inhabitants of Arrakis, adapted to its harsh desert environment.")
+
+    chunks = load_and_chunk_documents()
+    print(f"Number of chunks: {len(chunks)}")
+    for i, chunk in enumerate(chunks):
+        print(f"Chunk {i+1}: {chunk.page_content[:100]}...")
     # ... (previous code for loading and chunking)
     os.makedirs("./data", exist_ok=True)
     with open("./data/dune_excerpt.txt", "w") as f:
