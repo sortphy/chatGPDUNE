@@ -1,39 +1,13 @@
 import { useState } from "react";
-import { User, ThumbsUp, ThumbsDown, Database, FileSearch } from "lucide-react";
+import { User, ThumbsUp, ThumbsDown, Database, ExternalLink } from "lucide-react";
 import SourcesPopover from "./SourcesPopover";
 import TypingAnimation from "./TypingAnimation";
 import ReactMarkdown from 'react-markdown';
 
 /**
- * Simple markdown renderer for basic formatting
- * Supports: **bold**, *italic*, `code`, and preserves line breaks
- */
-function renderMarkdown(text) {
-  if (!text) return text;
-  
-  // Convert markdown to HTML
-  let html = text
-    // Bold text: **text** or __text__
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/__(.*?)__/g, '<strong>$1</strong>')
-    
-    // Italic text: *text* or _text_ (but not if it's part of bold)
-    .replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, '<em>$1</em>')
-    .replace(/(?<!_)_([^_]+?)_(?!_)/g, '<em>$1</em>')
-    
-    // Inline code: `code`
-    .replace(/`([^`]+?)`/g, '<code class="bg-[#3f2e1e]/50 text-[#cd853f] px-1 py-0.5 rounded text-sm font-mono">$1</code>')
-    
-    // Preserve line breaks
-    .replace(/\n/g, '<br>');
-  
-  return html;
-}
-
-/**
  * MessageBubble – chat message with inline feedback buttons (bot-only)
  * using solid/fill icons + CSS filter for a subtle Dune‑themed glow.
- * Now includes RAG indicator for bot messages and markdown support.
+ * Now includes RAG indicator for bot messages and full markdown support via react-markdown.
  */
 export default function MessageBubble({ message, onFeedback }) {
   const isUser = message.from === "user";
@@ -65,6 +39,128 @@ export default function MessageBubble({ message, onFeedback }) {
         ? { filter: "sepia(0.8) saturate(1.3) brightness(1.05)" }
         : undefined,
     };
+  };
+
+  // Custom components for ReactMarkdown to match your Dune theme
+  const markdownComponents = {
+    // Headers
+    h1: ({ children }) => (
+      <h1 className="text-2xl font-bold text-[#cd853f] mb-3 mt-2">{children}</h1>
+    ),
+    h2: ({ children }) => (
+      <h2 className="text-xl font-bold text-[#cd853f] mb-2 mt-2">{children}</h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className="text-lg font-semibold text-[#cd853f] mb-2 mt-1">{children}</h3>
+    ),
+    h4: ({ children }) => (
+      <h4 className="text-base font-semibold text-[#cd853f] mb-1 mt-1">{children}</h4>
+    ),
+    h5: ({ children }) => (
+      <h5 className="text-sm font-semibold text-[#cd853f] mb-1 mt-1">{children}</h5>
+    ),
+    h6: ({ children }) => (
+      <h6 className="text-xs font-semibold text-[#cd853f] mb-1 mt-1">{children}</h6>
+    ),
+    
+    // Paragraphs
+    p: ({ children }) => (
+      <p className="mb-2 last:mb-0">{children}</p>
+    ),
+    
+    // Lists
+    ul: ({ children }) => (
+      <ul className="list-disc list-inside mb-2 space-y-1 text-[#e5ddd5]">{children}</ul>
+    ),
+    ol: ({ children }) => (
+      <ol className="list-decimal list-inside mb-2 space-y-1 text-[#e5ddd5]">{children}</ol>
+    ),
+    li: ({ children }) => (
+      <li className="text-[#e5ddd5]">{children}</li>
+    ),
+    
+    // Inline code
+    code: ({ inline, children }) => {
+      if (inline) {
+        return (
+          <code className="bg-[#3f2e1e]/50 text-[#cd853f] px-1 py-0.5 rounded text-sm font-mono">
+            {children}
+          </code>
+        );
+      }
+      // Block code (fallback, though react-markdown usually uses pre > code)
+      return (
+        <code className="block bg-[#3f2e1e]/70 text-[#cd853f] p-3 rounded-lg text-sm font-mono overflow-x-auto">
+          {children}
+        </code>
+      );
+    },
+    
+    // Code blocks
+    pre: ({ children }) => (
+      <pre className="bg-[#3f2e1e]/70 text-[#cd853f] p-3 rounded-lg text-sm font-mono overflow-x-auto mb-2 border border-[#8b4513]/30">
+        {children}
+      </pre>
+    ),
+    
+    // Links
+    a: ({ href, children }) => (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[#cd853f] hover:text-[#daa520] underline decoration-1 underline-offset-2 inline-flex items-center gap-1 transition-colors"
+      >
+        {children}
+        <ExternalLink className="w-3 h-3" />
+      </a>
+    ),
+    
+    // Blockquotes
+    blockquote: ({ children }) => (
+      <blockquote className="border-l-4 border-[#cd853f]/50 pl-4 italic text-[#a67c52] mb-2 bg-[#3f2e1e]/20 py-2 rounded-r">
+        {children}
+      </blockquote>
+    ),
+    
+    // Strong/Bold
+    strong: ({ children }) => (
+      <strong className="font-bold text-[#cd853f]">{children}</strong>
+    ),
+    
+    // Emphasis/Italic
+    em: ({ children }) => (
+      <em className="italic text-[#daa520]">{children}</em>
+    ),
+    
+    // Horizontal rule
+    hr: () => (
+      <hr className="border-[#8b4513]/30 my-4" />
+    ),
+    
+    // Tables
+    table: ({ children }) => (
+      <div className="overflow-x-auto mb-2">
+        <table className="min-w-full border border-[#8b4513]/30 rounded-lg">
+          {children}
+        </table>
+      </div>
+    ),
+    thead: ({ children }) => (
+      <thead className="bg-[#3f2e1e]/50">{children}</thead>
+    ),
+    tbody: ({ children }) => (
+      <tbody>{children}</tbody>
+    ),
+    tr: ({ children }) => (
+      <tr className="border-b border-[#8b4513]/20">{children}</tr>
+    ),
+    th: ({ children }) => (
+      <th className="px-3 py-2 text-left text-[#cd853f] font-semibold">{children}</th>
+    ),
+    td: ({ children }) => (
+      <td className="px-3 py-2 text-[#e5ddd5]">{children}</td>
+    ),
   };
 
   // 24h timestamp
@@ -106,18 +202,19 @@ export default function MessageBubble({ message, onFeedback }) {
           className={`rounded-2xl px-4 py-3 shadow-lg transition-all duration-200 hover:shadow-xl ${
             isUser
               ? "bg-gradient-to-r from-[#a0522d] to-[#cd853f] text-white ml-auto border border-[#8b4513]/30"
-              : "bg-[#2d2214]/50 border border-[#3f2e1e]/50 backdrop-blur-sm"
+              : "bg-[#2d2214]/50 border border-[#3f2e1e]/50 backdrop-blur-sm text-[#e5ddd5]"
           }`}
         >
           {message.isTyping ? (
             <TypingAnimation />
+          ) : isUser ? (
+            <div className="leading-relaxed">{message.text}</div>
           ) : (
-            <div 
-              className="leading-relaxed"
-              dangerouslySetInnerHTML={{ 
-                __html: isUser ? message.text : renderMarkdown(message.text) 
-              }}
-            />
+            <div className="leading-relaxed">
+              <ReactMarkdown components={markdownComponents}>
+                {message.text}
+              </ReactMarkdown>
+            </div>
           )}
         </div>
 
