@@ -52,7 +52,8 @@ export default function App() {
           from: "bot", 
           text: data.reply,
           ragUsed: data.rag_used || false,
-          sources: data.top_sources || [],
+          sources: data.sources || [], // Use the new detailed sources format
+          sourcesLegacy: data.top_sources || [], // Keep old format for backwards compatibility
           model: data.model_used || selectedModel // Store which model was used
         }];
       });

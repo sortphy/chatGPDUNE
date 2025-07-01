@@ -95,28 +95,28 @@ export default function MessageBubble({ message, onFeedback }) {
             isUser ? "justify-end" : "justify-start"
           }`}>
             {/* RAG indicator (clickable to show sources) */}
-            {message.ragUsed && (
+            {message.ragUsed && message.sources && message.sources.length > 0 && (
               <button
-                onClick={() => setShowSources((p) => !p)}
-                aria-label="Ver fontes RAG"
+                onClick={() => setShowSources(true)}
+                aria-label="View RAG sources"
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#cd853f]/20 border border-[#cd853f]/30 text-[#cd853f] text-xs font-medium hover:bg-[#cd853f]/30 transition-colors"
               >
                 <Database className="w-3 h-3" />
-                <span>RAG</span>
+                <span>RAG ({message.sources.length})</span>
               </button>
             )}
 
             {/* Feedback buttons */}
             <button
               onClick={() => toggle("up")}
-              aria-label="Curtir resposta"
+              aria-label="Like response"
               className="p-1 focus:outline-none"
             >
               <ThumbsUp {...iconProps("up")} />
             </button>
             <button
               onClick={() => toggle("down")}
-              aria-label="Não curtir resposta"
+              aria-label="Dislike response"
               className="p-1 focus:outline-none"
             >
               <ThumbsDown {...iconProps("down")} />
@@ -136,7 +136,7 @@ export default function MessageBubble({ message, onFeedback }) {
           </div>
         )}
 
-        {/* Sources Popover */}
+        {/* Sources Popover - now shows as modal */}
         {showSources && message.sources && (
           <SourcesPopover
             sources={message.sources}

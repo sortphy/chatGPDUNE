@@ -246,17 +246,40 @@ async def chat(message: Message):
             "sources_used": len(relevant_chunks)
         }
 
-        # Add source information if available
+        # Add source information with actual content
         if relevant_chunks:
             sources = []
-            for chunk in relevant_chunks[:3]:  # Show top 3 sources
+            for i, chunk in enumerate(relevant_chunks):  # Use same number as original (top 5 from retrieve_relevant_chunks)
+                source_data = {
+                    "id": i + 1,
+                    "content": chunk["text"],
+                    "score": round(chunk["score"], 4) if chunk.get("score") else None,
+                    "preview": chunk["text"][:150] + "..." if len(chunk["text"]) > 150 else chunk["text"]
+                }
+                
+                # Add metadata if available
                 if chunk.get("metadata"):
                     source_file = chunk["metadata"].get("source_file", "Unknown")
                     source_type = chunk["metadata"].get("source_type", "local")
-                    sources.append(f"{source_file} ({source_type})")
+                    source_data["file"] = source_file
+                    source_data["type"] = source_type
                 else:
-                    sources.append("Database chunk")
-            response_data["top_sources"] = sources
+                    source_data["file"] = "Database chunk"
+                    source_data["type"] = "unknown"
+                
+                sources.append(source_data)
+            
+            response_data["sources"] = sources
+            
+            # Keep the old format for backwards compatibility (showing top 3 as before)
+            response_data["top_sources"] = []
+            for chunk in relevant_chunks[:3]:  # Show top 3 sources as before
+                if chunk.get("metadata"):
+                    source_file = chunk["metadata"].get("source_file", "Unknown")
+                    source_type = chunk["metadata"].get("source_type", "local")
+                    response_data["top_sources"].append(f"{source_file} ({source_type})")
+                else:
+                    response_data["top_sources"].append("Database chunk")
         
         logger.info(f"Response generated using {model_config['name']} (RAG: {message.use_rag})")
         return response_data
