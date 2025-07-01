@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { User, ThumbsUp, ThumbsDown, Database } from "lucide-react";
+import { User, ThumbsUp, ThumbsDown, Database, FileSearch } from "lucide-react";
+import SourcesPopover from "./SourcesPopover";
 import TypingAnimation from "./TypingAnimation";
 
 /**
@@ -10,6 +11,7 @@ import TypingAnimation from "./TypingAnimation";
 export default function MessageBubble({ message, onFeedback }) {
   const isUser = message.from === "user";
   const [reaction, setReaction] = useState(null); // 'up' | 'down' | null
+  const [showSources, setShowSources] = useState(false);
 
   const toggle = (type) => {
     const next = reaction === type ? null : type;
@@ -71,7 +73,7 @@ export default function MessageBubble({ message, onFeedback }) {
       </div>
 
       {/* Message + reactions */}
-      <div className={`group max-w-3xl ${isUser ? "ml-12" : "mr-12"}`}>
+      <div className={`relative group max-w-3xl ${isUser ? "ml-12" : "mr-12"}`}>
         {/* Bubble */}
         <div
           className={`rounded-2xl px-4 py-3 shadow-lg transition-all duration-200 hover:shadow-xl ${
@@ -87,25 +89,24 @@ export default function MessageBubble({ message, onFeedback }) {
           )}
         </div>
 
-        {/* RAG Indicator - only for bot messages */}
-        {!isUser && message.ragUsed && (
-          <div className="flex items-center gap-1 mt-1 mb-1">
-            <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#cd853f]/20 border border-[#cd853f]/30 text-[#cd853f] text-xs font-medium">
-              <Database className="w-3 h-3" />
-              <span>RAG</span>
-            </div>
-            {/* Optional: Show source count if available */}
-            {message.sources && message.sources.length > 0 && (
-              <span className="text-xs text-[#a67c52] ml-1">
-                ({message.sources.length} source{message.sources.length !== 1 ? 's' : ''})
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Feedback (bot only) */}
+        {/* All controls in one row - only for bot messages */}
         {!isUser && (
-          <div className="flex gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className={`flex items-center gap-2 mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${
+            isUser ? "justify-end" : "justify-start"
+          }`}>
+            {/* RAG indicator (clickable to show sources) */}
+            {message.ragUsed && (
+              <button
+                onClick={() => setShowSources((p) => !p)}
+                aria-label="Ver fontes RAG"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#cd853f]/20 border border-[#cd853f]/30 text-[#cd853f] text-xs font-medium hover:bg-[#cd853f]/30 transition-colors"
+              >
+                <Database className="w-3 h-3" />
+                <span>RAG</span>
+              </button>
+            )}
+
+            {/* Feedback buttons */}
             <button
               onClick={() => toggle("up")}
               aria-label="Curtir resposta"
@@ -120,17 +121,28 @@ export default function MessageBubble({ message, onFeedback }) {
             >
               <ThumbsDown {...iconProps("down")} />
             </button>
+
+            {/* Timestamp */}
+            <span className="text-xs text-[#a67c52] px-1">
+              {timestamp}
+            </span>
           </div>
         )}
 
-        {/* Timestamp */}
-        <div
-          className={`text-xs text-[#a67c52] mt-1 px-1 opacity-0 group-hover:opacity-100 transition-opacity ${
-            isUser ? "text-right" : "text-left"
-          }`}
-        >
-          {timestamp}
-        </div>
+        {/* User timestamp (separate for alignment) */}
+        {isUser && (
+          <div className="text-xs text-[#a67c52] mt-1 px-1 opacity-0 group-hover:opacity-100 transition-opacity text-right">
+            {timestamp}
+          </div>
+        )}
+
+        {/* Sources Popover */}
+        {showSources && message.sources && (
+          <SourcesPopover
+            sources={message.sources}
+            onClose={() => setShowSources(false)}
+          />
+        )}
       </div>
     </div>
   );

@@ -165,10 +165,10 @@ async def chat(message: Message):
         # Prepare response with metadata
         response_data = {
             "reply": reply_text,
-            "rag_used": bool(relevant_chunks),   # <- tell the client
+            "rag_used": bool(relevant_chunks),
             "sources_used": len(relevant_chunks)
         }
-        
+
         # Add source information if available
         if relevant_chunks:
             sources = []
@@ -212,7 +212,8 @@ async def health_check():
 async def search_chunks(query: str, limit: int = 10):
     """Direct search endpoint for testing"""
     try:
-        chunks = retrieve_relevant_chunks(qury, top_k=limit)
+        # FIXED: Changed 'qury' to 'query'
+        chunks = retrieve_relevant_chunks(query, top_k=limit)
         return {
             "query": query,
             "results_count": len(chunks),

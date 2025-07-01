@@ -37,7 +37,7 @@ export default function App() {
       const res = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: input }),
+        // FIXED: Removed duplicate body property
         body: JSON.stringify({ text: input, use_rag: useRag }),
       });
       const data = await res.json();
@@ -48,7 +48,8 @@ export default function App() {
           from: "bot", 
           text: data.reply,
           ragUsed: data.rag_used || false,
-          sources: data.sources || null
+          // FIXED: Map the correct field from backend response
+          sources: data.top_sources || []
         }];
       });
     } catch (err) {
