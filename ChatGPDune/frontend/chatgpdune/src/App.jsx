@@ -8,6 +8,7 @@ export default function App() {
   const [messages, setMessages] = useState([
     { from: "bot", text: "Welcome to the desert planet! Ask me anything about the Dune universe - from spice mining to sandworms, politics to prophecies.", ragUsed: false },
   ]);
+  const [useRag, setUseRag] = useState(true); // rag stuff
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -37,6 +38,7 @@ export default function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: input }),
+        body: JSON.stringify({ text: input, use_rag: useRag }),
       });
       const data = await res.json();
       
@@ -74,6 +76,17 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a120b] via-[#2b1b11] to-[#0a0603] text-[#f5f0e6]">
       <Header />
+
+      {/* quick toggle – style as you like */}
+      <div className="px-4 py-2">
+        <button
+          onClick={() => setUseRag(prev => !prev)}
+          className="rounded px-3 py-1 bg-[#c89b3c]/20 hover:bg-[#c89b3c]/40"
+        >
+          RAG&nbsp;{useRag ? "ON" : "OFF"}
+        </button>
+      </div>
+
       <MessageList 
         messages={messages} 
         messagesEndRef={messagesEndRef}

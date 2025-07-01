@@ -108,6 +108,7 @@ def retrieve_relevant_chunks(query: str, top_k: int = 5) -> List[Dict]:
 
 class Message(BaseModel):
     text: str
+    use_rag: bool = True   # default RAG online
 
 @app.on_event("startup")
 async def startup_event():
@@ -122,8 +123,11 @@ async def chat(message: Message):
         if "glauco" in message.text.lower():
             return {"reply": "Glauco."}
         
-        # Retrieve relevant context chunks
-        relevant_chunks = retrieve_relevant_chunks(message.text, top_k=5)
+        # Retrieve relevant context chunks - Skip retrieval if the user asked to disable RAG
+        relevant_chunks = (
+            retrieve_relevant_chunks(message.text, top_k=5)
+            if message.use_rag else []
+        )
         
         # Prepare context from retrieved chunks
         if relevant_chunks:
@@ -161,6 +165,7 @@ async def chat(message: Message):
         # Prepare response with metadata
         response_data = {
             "reply": reply_text,
+            "rag_used": bool(relevant_chunks),   # <- tell the client
             "sources_used": len(relevant_chunks)
         }
         
