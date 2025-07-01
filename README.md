@@ -118,13 +118,12 @@ npm install  # only needed the first time
 npm run start
 ```
 
----
 
-## 🧠 Features
 
-* 🐪 Dune-themed conversation style
-* 🧠 Retrieval-Augmented Generation with Neo4j
-* 🧾 Local LLM processing with deepseek-r1
-* ⚡ FastAPI-powered backend
-* 🎨 Modern frontend with React
+todo list 2.0
 
+precisa botar uma fila e abrir o negocio pra outras pessoas usarem ai na apresentacao da pra toda a sala usar
+mas precisa de uma lista se nao vai travar tudo
+
+ja aproveita e coloca aquele sistema de salvar todas as mensagens que forem enviadas rsss
+com o sistema de feedback para reinforcemcemcement trnaining
