@@ -2,6 +2,7 @@ import { useState } from "react";
 import { User, ThumbsUp, ThumbsDown, Database, FileSearch } from "lucide-react";
 import SourcesPopover from "./SourcesPopover";
 import TypingAnimation from "./TypingAnimation";
+import ReactMarkdown from 'react-markdown';
 
 /**
  * Simple markdown renderer for basic formatting
