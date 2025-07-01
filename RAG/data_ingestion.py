@@ -394,6 +394,8 @@ def load_and_chunk_documents(data_dir=DATA_DIR):
     supported_files = []
     
     for root, dirs, files in os.walk(data_dir):
+        if 'ignore' in root.split(os.sep):
+            continue
         for fn in files:
             _, ext = os.path.splitext(fn.lower())
             if ext in SUPPORTED_EXTENSIONS:
