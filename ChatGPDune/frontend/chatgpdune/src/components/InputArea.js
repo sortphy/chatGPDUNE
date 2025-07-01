@@ -23,7 +23,7 @@ export default function InputArea({
       const maxHeight = 200; // Max height in pixels (about 8-10 lines)
       inputRef.current.style.height = Math.min(scrollHeight, maxHeight) + 'px';
     }
-  }, [input]);
+  }, [input, inputRef]);
 
   const models = [
     { id: "deepseek-r1", name: "DeepSeek R1", description: "Reasoning model" },
