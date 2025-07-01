@@ -4,9 +4,35 @@ import SourcesPopover from "./SourcesPopover";
 import TypingAnimation from "./TypingAnimation";
 
 /**
+ * Simple markdown renderer for basic formatting
+ * Supports: **bold**, *italic*, `code`, and preserves line breaks
+ */
+function renderMarkdown(text) {
+  if (!text) return text;
+  
+  // Convert markdown to HTML
+  let html = text
+    // Bold text: **text** or __text__
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__(.*?)__/g, '<strong>$1</strong>')
+    
+    // Italic text: *text* or _text_ (but not if it's part of bold)
+    .replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, '<em>$1</em>')
+    .replace(/(?<!_)_([^_]+?)_(?!_)/g, '<em>$1</em>')
+    
+    // Inline code: `code`
+    .replace(/`([^`]+?)`/g, '<code class="bg-[#3f2e1e]/50 text-[#cd853f] px-1 py-0.5 rounded text-sm font-mono">$1</code>')
+    
+    // Preserve line breaks
+    .replace(/\n/g, '<br>');
+  
+  return html;
+}
+
+/**
  * MessageBubble – chat message with inline feedback buttons (bot-only)
  * using solid/fill icons + CSS filter for a subtle Dune‑themed glow.
- * Now includes RAG indicator for bot messages.
+ * Now includes RAG indicator for bot messages and markdown support.
  */
 export default function MessageBubble({ message, onFeedback }) {
   const isUser = message.from === "user";
@@ -85,7 +111,12 @@ export default function MessageBubble({ message, onFeedback }) {
           {message.isTyping ? (
             <TypingAnimation />
           ) : (
-            <div className="whitespace-pre-wrap leading-relaxed">{message.text}</div>
+            <div 
+              className="leading-relaxed"
+              dangerouslySetInnerHTML={{ 
+                __html: isUser ? message.text : renderMarkdown(message.text) 
+              }}
+            />
           )}
         </div>
 
