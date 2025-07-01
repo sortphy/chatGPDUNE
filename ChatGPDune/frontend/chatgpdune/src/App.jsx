@@ -37,7 +37,6 @@ export default function App() {
       const res = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // FIXED: Removed duplicate body property
         body: JSON.stringify({ text: input, use_rag: useRag }),
       });
       const data = await res.json();
@@ -48,7 +47,6 @@ export default function App() {
           from: "bot", 
           text: data.reply,
           ragUsed: data.rag_used || false,
-          // FIXED: Map the correct field from backend response
           sources: data.top_sources || []
         }];
       });
@@ -77,17 +75,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a120b] via-[#2b1b11] to-[#0a0603] text-[#f5f0e6]">
       <Header />
-
-      {/* quick toggle – style as you like */}
-      <div className="px-4 py-2">
-        <button
-          onClick={() => setUseRag(prev => !prev)}
-          className="rounded px-3 py-1 bg-[#c89b3c]/20 hover:bg-[#c89b3c]/40"
-        >
-          RAG&nbsp;{useRag ? "ON" : "OFF"}
-        </button>
-      </div>
-
+      
       <MessageList 
         messages={messages} 
         messagesEndRef={messagesEndRef}
@@ -99,6 +87,8 @@ export default function App() {
         onSendMessage={sendMessage}
         onKeyPress={handleKeyPress}
         inputRef={inputRef}
+        useRag={useRag}
+        setUseRag={setUseRag}
       />
     </div>
   );
