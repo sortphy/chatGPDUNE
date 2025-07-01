@@ -9,9 +9,10 @@ export default function InputArea({
   onKeyPress, 
   inputRef,
   useRag,
-  setUseRag
+  setUseRag,
+  selectedModel,
+  setSelectedModel
 }) {
-  const [selectedModel, setSelectedModel] = useState("deepseek-r1");
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   
   // Auto-resize textarea based on content
@@ -25,7 +26,11 @@ export default function InputArea({
   }, [input]);
 
   const models = [
-    { id: "deepseek-r1", name: "DeepSeek R1" }
+    { id: "deepseek-r1", name: "DeepSeek R1", description: "Reasoning model" },
+    // { id: "llama3.2", name: "Llama 3.2", description: "General purpose" },
+    // { id: "qwen2.5", name: "Qwen 2.5", description: "Multilingual" },
+    // { id: "mistral", name: "Mistral", description: "Fast inference" },
+    // { id: "phi3", name: "Phi 3", description: "Compact model" }
   ];
 
   return (
@@ -79,12 +84,12 @@ export default function InputArea({
                   disabled={isLoading}
                   className="flex items-center gap-1 px-3 py-1.5 text-xs text-[#a67c52] hover:text-white bg-[#3f2e1e]/40 hover:bg-[#3f2e1e]/60 rounded-lg transition-all duration-200 disabled:opacity-50"
                 >
-                  <span>{models.find(m => m.id === selectedModel)?.name}</span>
+                  <span>{models.find(m => m.id === selectedModel)?.name || "DeepSeek R1"}</span>
                   <ChevronDown className="w-3 h-3" />
                 </button>
                 
                 {showModelDropdown && (
-                  <div className="absolute bottom-full mb-2 right-0 bg-[#2b1b11] border border-[#3f2e1e]/50 rounded-lg shadow-xl min-w-32">
+                  <div className="absolute bottom-full mb-2 right-0 bg-[#2b1b11] border border-[#3f2e1e]/50 rounded-lg shadow-xl min-w-48 max-h-60 overflow-y-auto">
                     {models.map((model) => (
                       <button
                         key={model.id}
@@ -92,11 +97,12 @@ export default function InputArea({
                           setSelectedModel(model.id);
                           setShowModelDropdown(false);
                         }}
-                        className={`w-full text-left px-3 py-2 text-xs hover:bg-[#3f2e1e]/40 first:rounded-t-lg last:rounded-b-lg ${
+                        className={`w-full text-left px-3 py-2 hover:bg-[#3f2e1e]/40 first:rounded-t-lg last:rounded-b-lg transition-colors ${
                           selectedModel === model.id ? 'text-[#cd853f]' : 'text-[#a67c52]'
                         }`}
                       >
-                        {model.name}
+                        <div className="text-xs font-medium">{model.name}</div>
+                        <div className="text-xs opacity-70">{model.description}</div>
                       </button>
                     ))}
                   </div>
@@ -117,7 +123,7 @@ export default function InputArea({
 
         {/* Footer */}
         <div className="text-center text-xs text-[#a67c52] mt-3">
-          Using Ollama & DeepSeek R1 • Às vezes demora, depende da máquina, pois roda local.
+          Using Ollama & {models.find(m => m.id === selectedModel)?.name || "DeepSeek R1"} • Às vezes demora, depende da máquina, pois roda local.
         </div>
       </div>
     </div>

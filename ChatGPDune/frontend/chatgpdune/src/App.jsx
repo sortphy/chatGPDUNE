@@ -9,6 +9,7 @@ export default function App() {
     { from: "bot", text: "Welcome to the desert planet! Ask me anything about the Dune universe - from spice mining to sandworms, politics to prophecies.", ragUsed: false },
   ]);
   const [useRag, setUseRag] = useState(true); // rag stuff
+  const [selectedModel, setSelectedModel] = useState("deepseek-r1"); // model selection
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -37,7 +38,11 @@ export default function App() {
       const res = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: input, use_rag: useRag }),
+        body: JSON.stringify({ 
+          text: input, 
+          use_rag: useRag,
+          model: selectedModel // Send selected model to backend
+        }),
       });
       const data = await res.json();
       
@@ -47,7 +52,8 @@ export default function App() {
           from: "bot", 
           text: data.reply,
           ragUsed: data.rag_used || false,
-          sources: data.top_sources || []
+          sources: data.top_sources || [],
+          model: data.model_used || selectedModel // Store which model was used
         }];
       });
     } catch (err) {
@@ -56,7 +62,8 @@ export default function App() {
         return [...withoutTyping, { 
           from: "bot", 
           text: "The spice must flow... but connection failed. Please try again.",
-          ragUsed: false
+          ragUsed: false,
+          model: selectedModel
         }];
       });
     } finally {
@@ -89,6 +96,8 @@ export default function App() {
         inputRef={inputRef}
         useRag={useRag}
         setUseRag={setUseRag}
+        selectedModel={selectedModel}
+        setSelectedModel={setSelectedModel}
       />
     </div>
   );
