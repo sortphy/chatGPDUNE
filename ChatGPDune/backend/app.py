@@ -207,7 +207,7 @@ async def health_check():
 async def search_chunks(query: str, limit: int = 10):
     """Direct search endpoint for testing"""
     try:
-        chunks = retrieve_relevant_chunks(query, top_k=limit)
+        chunks = retrieve_relevant_chunks(qury, top_k=limit)
         return {
             "query": query,
             "results_count": len(chunks),
