@@ -76,6 +76,7 @@ BASE_PROMPT = (
     "Be objective and factual, avoiding personal opinions or interpretations, unless you are asked for your personal opinion."
     "Be concise and to the point, focusing on the core of the question, if you can answer a question with few words, do it, do not extend yourself more than needed, unless you believe it's necessary."
     "If a question is unclear, ask for clarification.\n\n"
+    "You can use markdown formatting (headers, lists, bold, italic, code blocks, etc.) when it would make your response clearer and more readable."
     "Use the following context from the Dune universe to answer the question:\n"
     "CONTEXT:\n{context}\n\n"
     "Question: {question}\n\n"
