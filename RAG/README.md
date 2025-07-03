@@ -1,3 +1,6 @@
+I asked manus to create a guide on how to implement a RAG on this project:
+
+
 # RAG Implementation Guide for chatGPDUNE
 
 This guide provides practical steps and code examples for implementing the proposed RAG architecture within the `chatGPDUNE` project. It focuses on integrating the RAG functionalities into the existing Python FastAPI backend.
