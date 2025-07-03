@@ -1,4 +1,4 @@
-I asked manus to create a guide on how to implement a RAG on this project:
+I asked manus to create a guide on how to implement a RAG in this project:
 
 
 # RAG Implementation Guide for chatGPDUNE
