@@ -10,7 +10,8 @@
 
 ## Ollama Setup:
 - Install Ollama from https://ollama.com/download
-- Pull whatever model you want to use, by default the project uses only deepseek-r1, so ollama ```pull deepseek-r1:latest```
+- Pull whatever model you want to use, by default the project uses only deepseek-r1, you can pull it using the following command:
+- ```pull deepseek-r1:latest```
 
 ## Neo4j Setup:
 - Install neo4j desktop from https://neo4j.com/download/
